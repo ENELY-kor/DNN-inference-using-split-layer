@@ -1,4 +1,3 @@
-
 const http = require('http');
 const express = require('express');
 const socketIo = require('socket.io');
@@ -12,7 +11,7 @@ app.use(cors());
 
 const io = socketIo(server, {
   cors: {
-    /* TODO : Change this to your webpage(s) url, You should set multiple origins if you have to run multiple webpages */
+    /* Change this to your webpage(s) url, You should set multiple origins if you have to run multiple webpages */
     origin: ["https://localhost:9999", "http://localhost:62123", "http://localhost:62124"],  
     methods: ["GET", "POST"]
   }
@@ -23,9 +22,8 @@ const io = socketIo(server, {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
   /*
-  TODO
   1. Join the room and emit the signal
-  HINT : https://developer.mozilla.org/ko/docs/Web/API/WebRTC_API/Signaling_and_video_calling
+  reference : https://developer.mozilla.org/ko/docs/Web/API/WebRTC_API/Signaling_and_video_calling
   */
   socket.on('join', (roomId) => {
     socket.join(roomId);
