@@ -4,6 +4,7 @@ Privacy-preserving AI, Split Inference, WebRTC
 The surge in high-performance AI services presents a significant challenge for mobile devices constrained by limited resources. The conventional solution—sending raw data to the cloud for processing and receiving the result—transfers the burden of heavy data transmission and poses a severe risk of information leakage to the user.
 
 This project aims to solve this dilemma by splitting the Deep Neural Network (DNN) layers between the user's device (Client) and the cloud server (Server). By performing initial inference on the mobile device, we aim to prevent raw data exposure and transmit only the smaller latent data (intermediate results), thereby reducing the consumer's transmission overhead (packet size).
+![model](images/model.png)
 
 The primary objective is to quantify this reduction by measuring the packet transmission volume at various layer split points. Simultaneously, we seek to demonstrate the stability (fidelity) of this approach by comparing the results from split inference with those from direct local inference, ensuring no data distortion occurs.
 
@@ -54,5 +55,30 @@ The final classification probabilities are displayed on the webpage via the labe
 Network traffic is monitored by periodically calling peerConnection.getStats() and specifically tracking the data-channel's bytesReceived to display the real-time transmission volume (bytes/s).
 
 # Result
+**sender**
 
+![send](images/send.png)
 
+**receiver**
+
+![recv](images/receive.png)
+
+**Data Transmission Reduction**
+
+* Latent Data Advantage: The strategy of transmitting latent data instead of raw data provided a significant reduction in data transmission volume, as quantified by the measured bytes/s.
+* Exponential Reduction Curve: The observed reduction benefit followed an exponentially decreasing trend as the split point moved deeper into the model. This is consistent with the CNN architecture, where the most substantial dimensionality reduction (and thus data compression) occurs in the initial layers.
+
+**Data Fidelity and Safety**
+
+* No Distortion: Comparison between the remote result (split inference) and the local result (direct inference) confirmed that no data distortion occurred. This validates the stability of the WebRTC buffer transfer and ONNX Runtime processing.
+* Security Assurance: Transmitting only the abstract latent data ensures that the consumer's raw input data is protected, fundamentally eliminating the risk of information leakage.
+
+# Key Insights & Reflection
+**Importance of Protocol-Specific Details**
+* Data Channel Ordering: A primary hurdle encountered was the sequencing issue of the Data Channel transfer, which is highly dependent on the underlying WebRTC and Socket.IO protocols.
+* Resolution: The problem was resolved by meticulous debugging and referencing the official documentation for RTCPeerConnection and its createDataChannel and ondatachannel handlers, ensuring the correct peer initiated the channel creation and the non-initiator correctly received it.
+* Lesson Learned: This underscored the critical importance of a holistic understanding of all interacting sub-components (e.g., WebRTC signaling, ONNX tensor layout) in a complex system. Moving forward, I commit to proactively studying and communicating about related components, even those outside my immediate ownership, to ensure system-wide stability.
+**Future Possibilities**
+The Split Layer concept can be further developed to enhance both efficiency and user utility
+* Customized Layer Augmentation: Leveraging the client's processing capability, user-specific, lightweight layers could be appended after the Client Module to perform personalized inference, thereby increasing user utility
+* Knowledge Distillation Application: Implementing Knowledge Distillation techniques could allow the Server Module's 'knowledge' to be used to subtly refine or adjust the latent data before final inference, further reducing consumer burden while improving the quality and relevance of the AI service output.
