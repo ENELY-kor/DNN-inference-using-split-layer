@@ -1,4 +1,3 @@
- /* TODO: Update the IP address and port number to match your server configuration */
 const signalingSocket = io('http://localhost:9999')
 
 const localVideo_1 = document.getElementById('localVideo_1');
@@ -11,7 +10,7 @@ const labelDisplay = document.getElementById('label');
 // To track the rxvolume
 const rxBytes = document.getElementById('rxBytes');
 
-// Constants. DO NOT CHANGE!
+// Constants.
 const frameRate = 30;
 const interval = 1000/frameRate;
 const room = 'Project2_WebRTC_ML';
@@ -39,29 +38,26 @@ function createPeerConnection() {
   peerConnection = new RTCPeerConnection(configuration);
   initiator = true;
   /*
-  TODO
   1. Create a data channel if this is the initiating peer
   2. Handle incoming data channel from remote peer
   */
   if (initiator) {
-    // 데이터 채널 생성
+    //make data channel
     dataChannel = peerConnection.createDataChannel("dataChannel");
 
-    // 데이터 채널 이벤트 설정
+    //set event
     setupDataChannel(dataChannel);
   }
-  // 상대방에서 데이터 채널을 받으면 설정
+  //cross event than open channel
 
   peerConnection.ondatachannel = (event) => {
     console.log('Received remote data channel');
-    dataChannel = event.channel; // 받은 채널 저장
-    setupDataChannel(dataChannel); // 받은 채널에 대해 설정
+    dataChannel = event.channel; //save peer
+    setupDataChannel(dataChannel); //set peer
   };
 
   peerConnection.onicecandidate = (event) => {
-    /* TODO
-    1. If you received event that the ICE candidate is generated, send the ICE candidate to the peer
-    */
+    // If you received event that the ICE candidate is generated, send the ICE candidate to the peer
     if (event.candidate) {
       signalingSocket.emit('signal', { room, message: { type: 'iceCandidate', candidate: event.candidate } });
     }
@@ -83,9 +79,7 @@ signalingSocket.on('connect', () => {
 
 signalingSocket.on('signal', async (message) => {
   console.log('Received signal:', message);
-  /* TODO
-  1. Regarding the type of message you received, handle the offer, answer, and ICE candidates
-  */
+  //Regarding the type of message you received, handle the offer, answer, and ICE candidates
   if (!peerConnection) {createPeerConnection();}
 
   if (message.type === 'offer') { 
@@ -137,11 +131,10 @@ generateButton.addEventListener('click', async () => {
 
 // Function to capture video frames
 function captureFrameFromVideo() {
-  /* TODO 
+  /* 
   1. Get the current frame from the video using the canvas element
   2. Reshape the frame to the approriate dimensions for the DNN model
   3. Call 'test' function for DNN inference
-  HINT : check the model structure in the python file.
   */
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
@@ -161,8 +154,7 @@ function captureFrameFromVideo() {
   
   return test(inputTensor);
 }
-//////////임의로 만든 test code
-//////////임의로 만든 test code
+//////////test code
 function preprocessImage(imageData) {
   const height = 32;
   const width = 32;
@@ -180,7 +172,7 @@ function preprocessImage(imageData) {
     tensor[tensorIndex] = r;//(r - mean[0]) / std[0]; // Red channel
     tensor[tensorIndex + height * width] = g;//(g - mean[1]) / std[1]; // Green channel
     tensor[tensorIndex + 2 * height * width] = b; // (b - mean[2]) / std[2]; // Blue channel    
-    //정규화
+    //normalization
     tensorIndex++;
   }
   return new ort.Tensor('float32', tensor, dims);
@@ -188,15 +180,13 @@ function preprocessImage(imageData) {
 /////////////
 //DNN inference code
 async function test(imageData) {
-  /* TODO 
+  /*
   1. Load the ONNX model
   2. Convert image data to tensor used by the onnxruntime
   3. Run the inference
   4. Send the output data to the receiver via the data channel
-  WARNING : You have to do CORRECT DATA CONVERSION to get the correct label!
-  HINT : Think about the memory layout of the image data and the tensor
-  HINT : https://onnxruntime.ai/docs/api/js/index.html
-  HINT : https://onnxruntime.ai/docs/
+  reference: https://onnxruntime.ai/docs/api/js/index.html
+  reference: https://onnxruntime.ai/docs/
   */
   try { 
     //test for three case of CNN split
@@ -225,10 +215,7 @@ async function test(imageData) {
 }
 
 function setupDataChannel(channel) {
-  /*
-  TODO
-  1. Define the behavior of the data channel (E.g. onopen, onmessage)
-  */
+  //Define the behavior of the data channel (E.g. onopen, onmessage)
   channel.onopen = () => {
     console.log("Data channel is open and ready to send messages");
   };
@@ -236,18 +223,18 @@ function setupDataChannel(channel) {
     console.log("Message received from peer: ", event.data);
     rxBytes.innerHTML = `Received message: ${event.data}`;
   };
-  // 데이터 채널에서 오류가 발생하면 호출되는 이벤트 핸들러
+  //if there be error
   channel.onerror = (error) => {
     console.error("Data channel error:", error);
   };
-  // 데이터 채널이 닫히면 호출되는 이벤트 핸들러
+  //if channel closed
   channel.onclose = () => {
     console.log("Data channel is closed");
   };
 }
 
 
-// Display the label on the webpage. DO NOT CHANGE!
+// Display the label on the webpage.
 function labelprocess(outTensor){
   CIFAR10_CLASSES = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"];
   let label_output = "";
@@ -258,11 +245,7 @@ function labelprocess(outTensor){
 }
 
 playButton_1.addEventListener('click', () => {
-  /* TODO 
-  1. Start the local video stream when playButton_1 is clicked
-  */
-
-
+  //Start the local video stream when playButton_1 is clicked
   try {
     startLocalStream_1(); // 비동기 함수 호출 대기
     console.log('Local stream started and playing');
