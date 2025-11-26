@@ -81,4 +81,3 @@ Network traffic is monitored by periodically calling peerConnection.getStats() a
 **Future Possibilities**
 The Split Layer concept can be further developed to enhance both efficiency and user utility
 * Customized Layer Augmentation: Leveraging the client's processing capability, user-specific, lightweight layers could be appended after the Client Module to perform personalized inference, thereby increasing user utility
-* Knowledge Distillation Application: Implementing Knowledge Distillation techniques could allow the Server Module's 'knowledge' to be used to subtly refine or adjust the latent data before final inference, further reducing consumer burden while improving the quality and relevance of the AI service output.
