@@ -1,5 +1,4 @@
- /* TODO: Update the IP address and port number to match your server configuration */
- const signalingSocket = io('http://localhost:9999')
+const signalingSocket = io('http://localhost:9999')
 
 const labelDisplay = document.getElementById('label');
 
@@ -10,7 +9,7 @@ const rxBytes = document.getElementById('rxBytes');
 const capturingCanvas = document.createElement('canvas');
 const capturingContext = capturingCanvas.getContext('2d');
 
-// Constants. DO NOT CHANGE!
+// Constants.
 const frameRate = 30;
 const interval = 1000/frameRate;
 const room = 'Project2_WebRTC_ML';
@@ -24,30 +23,23 @@ function createPeerConnection() {
   console.log('Creating peer connection');
   peerConnection = new RTCPeerConnection(configuration);
 
-  /*
-  TODO
-  1. Create a data channel if this is the initiating peer
-  2. Handle incoming data channel from remote peer
-  */
   if (initiator) {
-    // 데이터 채널 생성
+    //open data channel
     dataChannel = peerConnection.createDataChannel("dataChannel");
 
-    // 데이터 채널 이벤트 설정
+    //set event
     setupDataChannel(dataChannel);
   }
-  // 상대방에서 데이터 채널을 받으면 설정
+  //open when other user make event
 
   peerConnection.ondatachannel = (event) => {
     console.log('Received remote data channel');
-    dataChannel = event.channel; // 받은 채널 저장
-    setupDataChannel(dataChannel); // 받은 채널에 대해 설정
+    dataChannel = event.channel; //save event channel
+    setupDataChannel(dataChannel); //setup channel
   };
 
   peerConnection.onicecandidate = (event) => {
-    /* TODO
-    1. If you received event that the ICE candidate is generated, send the ICE candidate to the peer
-    */
+    //If you received event that the ICE candidate is generated, send the ICE candidate to the peer
     if (event.candidate) {
       signalingSocket.emit('signal', { room, message: { type: 'iceCandidate', candidate: event.candidate } });
     }
@@ -70,9 +62,7 @@ signalingSocket.on('connect', () => {
 
 signalingSocket.on('signal', async (message) => {
   console.log('Received signal:', message);
-  /* TODO
-  1. Regarding the type of message you received, handle the offer, answer, and ICE candidates
-  */
+  // Regarding the type of message you received, handle the offer, answer, and ICE candidates
   if (!peerConnection) {createPeerConnection();}
 
   if (message.type === 'offer') { 
@@ -95,7 +85,7 @@ signalingSocket.on('signal', async (message) => {
   }
 });
 
-// Hint: createOffer function
+//createOffer function
 async function createOffer() {
   if (!peerConnection) createPeerConnection();
   const offer = await peerConnection.createOffer();
@@ -106,7 +96,7 @@ async function createOffer() {
 
 //DNN inference code
 async function test(intermediateTensor) {
-  /* TODO 
+  /* 
   1. Load the ONNX model
   2. Convert image data to tensor used by the onnxruntime
   3. Run the inference
@@ -116,12 +106,14 @@ async function test(intermediateTensor) {
     const session = await ort.InferenceSession.create('model_recv.onnx');
     //const session = await ort.InferenceSession.create('model_recv_h.onnx');
     //const session = await ort.InferenceSession.create('model_recv_m.onnx');
+    //check for sending data amount
 
     console.log('Model loaded successfully');
       // Run the model inference
     const inputTensor = new ort.Tensor('float32', intermediateTensor, [1, 32, 16, 16]);//for model_recv
     //const inputTensor = new ort.Tensor('float32', intermediateTensor, [1, 2048]);//for model_recv_h
     //const inputTensor = new ort.Tensor('float32', intermediateTensor, [1, 64, 8, 8]);//for model_recv_m
+    //check for data amount
     const feeds = { input: inputTensor };
     const output = await session.run(feeds);
     
@@ -143,12 +135,7 @@ headings.forEach((heading) => {
 });
 
 function setupDataChannel(channel) {
-  /*
-  TODO
-  1. Define the behavior of the data channel when the channel receives a message (onmessage)
-  HINT : You can call 'test' function when the channel receives a message to start the DNN inference
-  HINT : Behavior of channel.onopen is already defined. You can refer to it.
-  */
+  //Define the behavior of the data channel when the channel receives a message (onmessage)
   channel.onopen = () => {
     console.log('Data channel opened');
     const headings = document.querySelectorAll('h2');
